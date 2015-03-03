@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+
+# Following file removes the genre tag from MP3's.  This allows the iPod
+# to treat the file like a song, instead of a podcast, where they can be
+# added to a play list, instead of requiring manual start for each file.
+
+use MP3::Tag;
+MP3::Tag->config(write_v24 => 1);
+
+@files=glob "*.mp3";
+
+foreach $filename (@files) {
+	chomp $filename;
+	print "cleaning $filename\n";
+	$mp3 = MP3::Tag->new($filename);
+	$mp3->get_tags();
+	
+	$id3v2 = $mp3->{ID3v2} if exists $mp3->{ID3v2};
+	#print $id3v2->title;
+	($title,$track,$artist,$album,$comment,$year,$genre)=$mp3->autoinfo();
+	#print "\n$genre\n";
+	
+	if(exists $mp3->{ID3v1}) {
+	#	print "v1\n";
+	#	print $mp3->{ID3v1}->title,"\n";
+	#	print $mp3->{ID3v1}->genre,"\n";
+		$mp3->{ID3v1}->genre("");
+		$mp3->{ID3v1}->write_tag();
+	#	print "\n";
+	}
+	if(exists $mp3->{ID3v2}) {
+	#	print "v2\n";
+	#	print $mp3->{ID3v2}->title,"\n";
+	#	print $mp3->{ID3v2}->genre,"\n";;
+		$mp3->{ID3v2}->genre("");
+		$mp3->{ID3v2}->write_tag();
+	#	print "\n";
+	}
+}
